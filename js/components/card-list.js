@@ -123,6 +123,12 @@ export class CardList extends HTMLElement {
           font-family: inherit;
           background: var(--color-surface, #fff);
           color: var(--color-text, #1f2330);
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .search input:focus {
+          border-color: var(--color-primary, #4f46e5);
+          box-shadow: 0 0 0 3px var(--color-primary-soft, rgba(79, 70, 229, 0.25));
         }
         .filters {
           display: flex;

@@ -59,6 +59,13 @@ export class CardForm extends HTMLElement {
           font-family: inherit;
           resize: vertical;
           min-height: 70px;
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        textarea:focus {
+          border-color: var(--color-primary, #4f46e5);
+          box-shadow: 0 0 0 3px var(--color-primary-soft, rgba(79, 70, 229, 0.25));
+        }
         }
         .actions {
           display: flex;
