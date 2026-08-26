@@ -70,6 +70,22 @@ export class CardList extends HTMLElement {
           color: var(--color-text-muted, #6b7280);
           font-size: 0.9rem;
         }
+        .due {
+          display: inline-block;
+          margin-top: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 2px 8px;
+          border-radius: 999px;
+        }
+        .due.today {
+          background: #fee2e2;
+          color: var(--color-danger, #dc2626);
+        }
+        .due.future {
+          background: #e0e7ff;
+          color: var(--color-primary, #4f46e5);
+        }
         .actions {
           display: flex;
           gap: 6px;
@@ -179,6 +195,7 @@ function cardRow(card, audioSupported) {
       <div class="info">
         <div class="front">${escapeHtml(card.front)}</div>
         <div class="back">${escapeHtml(card.back)}</div>
+        <div class="due ${dueClass(card.srs.dueAt)}">${formatDue(card.srs.dueAt)}</div>
       </div>
       <div class="actions">
         ${audioSupported ? `<button data-audio="${escapeAttr(card.front)}" aria-label="Ouvir">${ICON_VOLUME}</button>` : ""}
@@ -198,6 +215,28 @@ const ICON_TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const ICON_CHEVRON_LEFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
 
 const ICON_CHEVRON_RIGHT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+
+function dueClass(dueAt) {
+  const due = new Date(dueAt);
+  const now = new Date();
+  return due <= now ? "today" : "future";
+}
+
+function formatDue(dueAt) {
+  const due = new Date(dueAt);
+  const now = new Date();
+
+  if (due <= now) return "Pronto para revisar";
+
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+  const daysUntil = Math.round((startOfDue - startOfToday) / (1000 * 60 * 60 * 24));
+
+  if (daysUntil === 1) return "Revisar amanhã";
+
+  const formatted = due.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  return `Revisar em ${daysUntil} dias (${formatted})`;
+}
 
 function escapeHtml(str) {
   const div = document.createElement("div");
