@@ -54,7 +54,7 @@ export class StudySession extends HTMLElement {
         }
         .rating-buttons {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 8px;
           margin-top: 16px;
         }
@@ -64,11 +64,16 @@ export class StudySession extends HTMLElement {
           border: none;
           font-weight: 600;
           font-size: 0.85rem;
+          line-height: 1.5;
         }
-        .again { background: #fee2e2; color: var(--color-danger, #dc2626); }
-        .hard { background: #fef3c7; color: var(--color-warning, #d97706); }
-        .good { background: #dcfce7; color: var(--color-success, #16a34a); }
-        .easy { background: #e0e7ff; color: var(--color-primary, #4f46e5); }
+        button small {
+          font-weight: 400;
+          font-size: 0.7rem;
+          opacity: 0.85;
+        }
+        .difficult { background: #fee2e2; color: var(--color-danger, #dc2626); }
+        .medium { background: #fef3c7; color: var(--color-warning, #d97706); }
+        .easy { background: #dcfce7; color: var(--color-success, #16a34a); }
       </style>
       ${
         card
@@ -76,10 +81,9 @@ export class StudySession extends HTMLElement {
         <div class="status">Cartão ${this.currentIndex + 1} de ${this.queue.length}</div>
         <flashcard-item id="item"></flashcard-item>
         <div class="rating-buttons">
-          <button class="again" data-rating="${RATING.AGAIN}">Errei</button>
-          <button class="hard" data-rating="${RATING.HARD}">Difícil</button>
-          <button class="good" data-rating="${RATING.GOOD}">Bom</button>
-          <button class="easy" data-rating="${RATING.EASY}">Fácil</button>
+          <button class="difficult" data-rating="${RATING.DIFFICULT}">Difícil<br><small>Não lembrou</small></button>
+          <button class="medium" data-rating="${RATING.MEDIUM}">Médio<br><small>Lembrou com dificuldade</small></button>
+          <button class="easy" data-rating="${RATING.EASY}">Fácil<br><small>Lembrou sem esforço</small></button>
         </div>
       `
           : `<div class="done">🎉 Nenhum cartão pendente para revisão agora.</div>`

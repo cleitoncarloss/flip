@@ -1,19 +1,21 @@
 /**
  * Implementação do algoritmo SM-2 (SuperMemo 2), usado pelo Anki.
- * quality: 0 (errei) a 3 (fácil), mapeado a partir dos botões de avaliação.
+ * quality: 0 (difícil/não lembrou) a 3 (fácil), mapeado a partir dos
+ * botões de avaliação. O valor 1 (antigo "difícil, mas lembrei") não é
+ * mais usado pela UI, mas a fórmula do fator de facilidade permanece
+ * válida para ele caso seja reintroduzido no futuro.
  */
 
 export const RATING = {
-  AGAIN: 0,
-  HARD: 1,
-  GOOD: 2,
+  DIFFICULT: 0,
+  MEDIUM: 2,
   EASY: 3,
 };
 
 export function nextReview(srs, rating) {
   let { repetitions, easeFactor, intervalDays } = srs;
 
-  if (rating === RATING.AGAIN) {
+  if (rating === RATING.DIFFICULT) {
     repetitions = 0;
     intervalDays = 1;
   } else {
