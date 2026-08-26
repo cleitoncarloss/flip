@@ -86,7 +86,7 @@ export class StudySession extends HTMLElement {
       ${
         card
           ? `
-        <div class="status">Cartão ${this.currentIndex + 1} de ${this.queue.length}</div>
+        <div class="status">${remainingLabel(this.queue.length - this.currentIndex)}</div>
         <flashcard-item id="item"></flashcard-item>
         <div class="rating-buttons">
           <button class="difficult" data-rating="${RATING.DIFFICULT}">Difícil<br><small>Não lembrou</small></button>
@@ -105,6 +105,10 @@ export class StudySession extends HTMLElement {
       });
     }
   }
+}
+
+function remainingLabel(count) {
+  return count === 1 ? "Falta 1 cartão" : `Faltam ${count} cartões`;
 }
 
 customElements.define("study-session", StudySession);
