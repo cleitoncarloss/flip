@@ -31,7 +31,8 @@ export class StudySession extends HTMLElement {
     const srs = nextReview(card.srs, rating);
     updateCard(card.id, { srs });
 
-    if (rating === RATING.DIFFICULT) {
+    const hasOtherCardsToInterleave = this.currentIndex + 1 < this.queue.length;
+    if (rating === RATING.DIFFICULT && hasOtherCardsToInterleave) {
       const insertAt = Math.min(this.currentIndex + REQUEUE_OFFSET, this.queue.length);
       this.queue.splice(insertAt, 0, { ...card, srs });
     }
