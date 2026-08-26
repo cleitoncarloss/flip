@@ -15,6 +15,9 @@ export class CardList extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.page = 1;
     this.filter = null;
+    this.search = "";
+    this._searchHadFocus = false;
+    this._searchCaret = 0;
   }
 
   connectedCallback() {
@@ -37,10 +40,23 @@ export class CardList extends HTMLElement {
     this.render();
   }
 
+  setSearch(value) {
+    const input = this.shadowRoot.querySelector("[data-search]");
+    this._searchHadFocus = true;
+    this._searchCaret = input ? input.selectionStart : value.length;
+    this.search = value;
+    this.page = 1;
+    this.render();
+  }
+
   render() {
     const allCards = loadCards();
     const audioSupported = isSpeechSupported();
-    const cards = this.filter ? allCards.filter((c) => dueGroup(c.srs.dueAt) === this.filter) : allCards;
+    const query = this.search.trim().toLowerCase();
+    let cards = this.filter ? allCards.filter((c) => dueGroup(c.srs.dueAt) === this.filter) : allCards;
+    if (query) {
+      cards = cards.filter((c) => c.front.toLowerCase().includes(query));
+    }
     const totalPages = Math.max(1, Math.ceil(cards.length / PAGE_SIZE));
     this.page = Math.min(this.page, totalPages);
     const start = (this.page - 1) * PAGE_SIZE;
@@ -83,6 +99,29 @@ export class CardList extends HTMLElement {
         .back {
           color: var(--color-text-muted, #6b7280);
           font-size: 0.9rem;
+        }
+        .search {
+          position: relative;
+          margin-bottom: 16px;
+        }
+        .search svg {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 18px;
+          height: 18px;
+          color: var(--color-text-muted, #6b7280);
+          pointer-events: none;
+        }
+        .search input {
+          width: 100%;
+          font-size: 1rem;
+          padding: 10px 12px 10px 38px;
+          border-radius: 8px;
+          border: 1px solid var(--color-border, #e5e7eb);
+          font-family: inherit;
+          background: var(--color-surface, #fff);
         }
         .filters {
           display: flex;
@@ -163,12 +202,16 @@ export class CardList extends HTMLElement {
         allCards.length === 0
           ? `<div class="empty">Nenhum cartão ainda. Adicione o primeiro acima.</div>`
           : `
+            <div class="search">
+              ${ICON_SEARCH}
+              <input type="search" data-search placeholder="Buscar pela frente do cartão..." value="${escapeAttr(this.search)}" />
+            </div>
             <div class="filters">
               ${FILTERS.map((f) => filterTag(f, allCards, this.filter)).join("")}
             </div>
             ${
               cards.length === 0
-                ? `<div class="empty">Nenhum cartão nessa categoria.</div>`
+                ? `<div class="empty">Nenhum cartão encontrado.</div>`
                 : `
                   <ul>${pageCards.map((c) => cardRow(c, audioSupported)).join("")}</ul>
                   ${
@@ -224,6 +267,16 @@ export class CardList extends HTMLElement {
     this.shadowRoot.querySelectorAll("[data-filter]").forEach((tag) => {
       tag.addEventListener("click", () => this.setFilter(tag.dataset.filter));
     });
+
+    const searchInput = this.shadowRoot.querySelector("[data-search]");
+    if (searchInput) {
+      searchInput.addEventListener("input", () => this.setSearch(searchInput.value));
+      if (this._searchHadFocus) {
+        this._searchHadFocus = false;
+        searchInput.focus();
+        searchInput.setSelectionRange(this._searchCaret, this._searchCaret);
+      }
+    }
   }
 }
 
@@ -252,6 +305,8 @@ const ICON_TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 const ICON_CHEVRON_LEFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
 
 const ICON_CHEVRON_RIGHT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+
+const ICON_SEARCH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
 
 function dueGroup(dueAt) {
   const due = new Date(dueAt);
