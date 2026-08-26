@@ -4,6 +4,10 @@
  * botões de avaliação. O valor 1 (antigo "difícil, mas lembrei") não é
  * mais usado pela UI, mas a fórmula do fator de facilidade permanece
  * válida para ele caso seja reintroduzido no futuro.
+ *
+ * "Difícil" marca o cartão como devido imediatamente (não espera um
+ * dia), e study-session.js o reinsere mais à frente na fila da sessão
+ * atual, para reforçar o aprendizado no mesmo dia em vez de só amanhã.
  */
 
 export const RATING = {
@@ -17,7 +21,13 @@ export function nextReview(srs, rating) {
 
   if (rating === RATING.DIFFICULT) {
     repetitions = 0;
-    intervalDays = 1;
+    intervalDays = 0;
+    return {
+      repetitions,
+      easeFactor,
+      intervalDays,
+      dueAt: new Date().toISOString(),
+    };
   } else {
     easeFactor = Math.max(
       1.3,

@@ -1,6 +1,8 @@
 import { getDueCards, updateCard } from "../storage.js";
 import { nextReview, RATING } from "../spaced-repetition.js";
 
+const REQUEUE_OFFSET = 3;
+
 export class StudySession extends HTMLElement {
   constructor() {
     super();
@@ -28,6 +30,12 @@ export class StudySession extends HTMLElement {
     if (!card) return;
     const srs = nextReview(card.srs, rating);
     updateCard(card.id, { srs });
+
+    if (rating === RATING.DIFFICULT) {
+      const insertAt = Math.min(this.currentIndex + REQUEUE_OFFSET, this.queue.length);
+      this.queue.splice(insertAt, 0, { ...card, srs });
+    }
+
     this.currentIndex += 1;
     this.render();
     this.dispatchEvent(new CustomEvent("session-progress", { bubbles: true, composed: true }));
