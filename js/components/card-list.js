@@ -57,10 +57,6 @@ export class CardList extends HTMLElement {
           color: var(--color-text-muted, #6b7280);
           font-size: 0.9rem;
         }
-        .tags {
-          font-size: 0.75rem;
-          color: var(--color-primary, #4f46e5);
-        }
         .actions {
           display: flex;
           gap: 6px;
@@ -115,7 +111,6 @@ function cardRow(card, audioSupported) {
       <div class="info">
         <div class="front">${escapeHtml(card.front)}</div>
         <div class="back">${escapeHtml(card.back)}</div>
-        ${card.tags?.length ? `<div class="tags">${card.tags.map(escapeHtml).join(" · ")}</div>` : ""}
       </div>
       <div class="actions">
         ${audioSupported ? `<button data-audio="${escapeAttr(card.front)}" aria-label="Ouvir">🔊</button>` : ""}

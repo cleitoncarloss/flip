@@ -22,14 +22,12 @@ function saveCards(cards) {
   localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
 }
 
-export function createCard({ front, back, example = "", tags = [] }) {
+export function createCard({ front, back }) {
   const cards = loadCards();
   const card = {
     id: generateId(),
     front,
     back,
-    example,
-    tags,
     createdAt: nowIso(),
     srs: {
       repetitions: 0,

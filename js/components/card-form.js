@@ -38,16 +38,14 @@ export class CardForm extends HTMLElement {
           font-weight: 600;
           color: var(--color-text-muted, #6b7280);
         }
-        input, textarea {
+        textarea {
           font-size: 1rem;
           padding: 10px 12px;
           border-radius: 8px;
           border: 1px solid var(--color-border, #e5e7eb);
           font-family: inherit;
-        }
-        textarea {
           resize: vertical;
-          min-height: 60px;
+          min-height: 70px;
         }
         .actions {
           display: flex;
@@ -77,19 +75,11 @@ export class CardForm extends HTMLElement {
         <h2>${card ? "Editar cartão" : "Novo cartão"}</h2>
         <div>
           <label for="front">Frente (inglês)</label>
-          <input id="front" required value="${escapeAttr(card?.front ?? "")}" placeholder="ex: to give up" />
+          <textarea id="front" required placeholder="ex: to give up">${escapeHtml(card?.front ?? "")}</textarea>
         </div>
         <div>
           <label for="back">Verso (tradução/significado)</label>
-          <input id="back" required value="${escapeAttr(card?.back ?? "")}" placeholder="ex: desistir" />
-        </div>
-        <div>
-          <label for="example">Exemplo (opcional)</label>
-          <textarea id="example" placeholder="ex: Don't give up on your dreams.">${card?.example ?? ""}</textarea>
-        </div>
-        <div>
-          <label for="tags">Tags (separadas por vírgula, opcional)</label>
-          <input id="tags" value="${escapeAttr((card?.tags ?? []).join(", "))}" placeholder="ex: phrasal verbs, verbos" />
+          <textarea id="back" required placeholder="ex: desistir">${escapeHtml(card?.back ?? "")}</textarea>
         </div>
         <div class="actions">
           ${card ? `<button type="button" class="secondary" data-cancel>Cancelar</button>` : ""}
@@ -117,19 +107,14 @@ export class CardForm extends HTMLElement {
   handleSubmit() {
     const front = this.shadowRoot.getElementById("front").value.trim();
     const back = this.shadowRoot.getElementById("back").value.trim();
-    const example = this.shadowRoot.getElementById("example").value.trim();
-    const tagsRaw = this.shadowRoot.getElementById("tags").value.trim();
-    const tags = tagsRaw
-      ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
 
     if (!front || !back) return;
 
     if (this._editingCard) {
-      updateCard(this._editingCard.id, { front, back, example, tags });
+      updateCard(this._editingCard.id, { front, back });
       this._editingCard = null;
     } else {
-      createCard({ front, back, example, tags });
+      createCard({ front, back });
     }
 
     this.render();
@@ -137,10 +122,10 @@ export class CardForm extends HTMLElement {
   }
 }
 
-function escapeAttr(str) {
+function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str ?? "";
-  return div.innerHTML.replace(/"/g, "&quot;");
+  return div.innerHTML;
 }
 
 customElements.define("card-form", CardForm);

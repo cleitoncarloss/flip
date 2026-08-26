@@ -38,7 +38,7 @@ export class FlashcardItem extends HTMLElement {
 
   render() {
     if (!this._card) return;
-    const { front, back, example } = this._card;
+    const { front, back } = this._card;
     const flipped = this.hasAttribute("flipped");
     const audioSupported = isSpeechSupported();
 
@@ -80,11 +80,7 @@ export class FlashcardItem extends HTMLElement {
         .text {
           font-size: 1.4rem;
           font-weight: 600;
-        }
-        .example {
-          font-size: 0.95rem;
-          color: var(--color-text-muted, #6b7280);
-          font-style: italic;
+          white-space: pre-wrap;
         }
         .audio-btn {
           background: none;
@@ -115,7 +111,6 @@ export class FlashcardItem extends HTMLElement {
         </div>
         <div class="face back">
           <div class="text">${escapeHtml(back)}</div>
-          ${example ? `<div class="example">${escapeHtml(example)}</div>` : ""}
           <div class="hint">Toque para voltar</div>
         </div>
       </div>
