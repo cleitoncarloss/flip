@@ -58,3 +58,10 @@ export function deleteCard(id) {
 export function getDueCards(referenceDate = new Date()) {
   return loadCards().filter((c) => new Date(c.srs.dueAt) <= referenceDate);
 }
+
+export function findCardByFront(front, excludeId = null) {
+  const normalized = front.trim().toLowerCase();
+  return loadCards().find(
+    (c) => c.id !== excludeId && c.front.trim().toLowerCase() === normalized
+  );
+}

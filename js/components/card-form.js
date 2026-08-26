@@ -1,14 +1,18 @@
-import { createCard, updateCard } from "../storage.js";
+import { createCard, updateCard, findCardByFront } from "../storage.js";
 
 export class CardForm extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
     this._editingCard = null;
+    this._error = "";
+    this._draft = null;
   }
 
   set editingCard(card) {
     this._editingCard = card;
+    this._error = "";
+    this._draft = null;
     this.render();
   }
 
@@ -18,6 +22,8 @@ export class CardForm extends HTMLElement {
 
   render() {
     const card = this._editingCard;
+    const front = this._draft?.front ?? card?.front ?? "";
+    const back = this._draft?.back ?? card?.back ?? "";
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -75,16 +81,33 @@ export class CardForm extends HTMLElement {
           margin: 0 0 4px;
           font-size: 1.1rem;
         }
+        .error {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #fee2e2;
+          color: var(--color-danger, #dc2626);
+          border-radius: 8px;
+          padding: 10px 12px;
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+        .error svg {
+          width: 18px;
+          height: 18px;
+          flex-shrink: 0;
+        }
       </style>
       <form>
         <h2>${card ? "Editar cartão" : "Novo cartão"}</h2>
+        ${this._error ? `<div class="error">${ICON_ALERT}<span>${escapeHtml(this._error)}</span></div>` : ""}
         <div class="field">
           <label for="front">Frente (inglês)</label>
-          <textarea id="front" required placeholder="ex: to give up">${escapeHtml(card?.front ?? "")}</textarea>
+          <textarea id="front" required placeholder="ex: to give up">${escapeHtml(front)}</textarea>
         </div>
         <div class="field">
           <label for="back">Verso (tradução/significado)</label>
-          <textarea id="back" required placeholder="ex: desistir">${escapeHtml(card?.back ?? "")}</textarea>
+          <textarea id="back" required placeholder="ex: desistir">${escapeHtml(back)}</textarea>
         </div>
         <div class="actions">
           ${card ? `<button type="button" class="secondary" data-cancel>Cancelar</button>` : ""}
@@ -103,6 +126,8 @@ export class CardForm extends HTMLElement {
     if (cancelBtn) {
       cancelBtn.addEventListener("click", () => {
         this._editingCard = null;
+        this._error = "";
+        this._draft = null;
         this.dispatchEvent(new CustomEvent("cancel-edit", { bubbles: true, composed: true }));
         this.render();
       });
@@ -115,6 +140,14 @@ export class CardForm extends HTMLElement {
 
     if (!front || !back) return;
 
+    const duplicate = findCardByFront(front, this._editingCard?.id ?? null);
+    if (duplicate) {
+      this._error = "Já existe um cartão com essa frente.";
+      this._draft = { front, back };
+      this.render();
+      return;
+    }
+
     if (this._editingCard) {
       updateCard(this._editingCard.id, { front, back });
       this._editingCard = null;
@@ -122,10 +155,14 @@ export class CardForm extends HTMLElement {
       createCard({ front, back });
     }
 
+    this._error = "";
+    this._draft = null;
     this.render();
     this.dispatchEvent(new CustomEvent("card-saved", { bubbles: true, composed: true }));
   }
 }
+
+const ICON_ALERT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
 
 function escapeHtml(str) {
   const div = document.createElement("div");
