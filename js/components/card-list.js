@@ -3,11 +3,18 @@ import { speak, isSpeechSupported } from "../speech.js";
 
 const PAGE_SIZE = 10;
 
+const FILTERS = [
+  { key: "today", label: "Pronto para revisar" },
+  { key: "tomorrow", label: "Revisar amanhã" },
+  { key: "later", label: "Em breve" },
+];
+
 export class CardList extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
     this.page = 1;
+    this.filter = null;
   }
 
   connectedCallback() {
@@ -24,9 +31,16 @@ export class CardList extends HTMLElement {
     this.render();
   }
 
+  setFilter(key) {
+    this.filter = this.filter === key ? null : key;
+    this.page = 1;
+    this.render();
+  }
+
   render() {
-    const cards = loadCards();
+    const allCards = loadCards();
     const audioSupported = isSpeechSupported();
+    const cards = this.filter ? allCards.filter((c) => dueGroup(c.srs.dueAt) === this.filter) : allCards;
     const totalPages = Math.max(1, Math.ceil(cards.length / PAGE_SIZE));
     this.page = Math.min(this.page, totalPages);
     const start = (this.page - 1) * PAGE_SIZE;
@@ -70,21 +84,32 @@ export class CardList extends HTMLElement {
           color: var(--color-text-muted, #6b7280);
           font-size: 0.9rem;
         }
-        .due {
-          display: inline-block;
-          margin-top: 6px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          padding: 2px 8px;
+        .filters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+        .filter-tag {
+          border: 1px solid var(--color-border, #e5e7eb);
+          background: var(--color-surface, #fff);
           border-radius: 999px;
+          padding: 6px 14px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--color-text-muted, #6b7280);
         }
-        .due.today {
-          background: #fee2e2;
-          color: var(--color-danger, #dc2626);
+        .filter-tag:hover {
+          background: var(--color-bg, #f5f6fa);
         }
-        .due.future {
-          background: #e0e7ff;
-          color: var(--color-primary, #4f46e5);
+        .filter-tag.active {
+          background: var(--color-primary, #4f46e5);
+          border-color: var(--color-primary, #4f46e5);
+          color: white;
+        }
+        .filter-tag .count {
+          opacity: 0.75;
+          margin-left: 4px;
         }
         .actions {
           display: flex;
@@ -135,20 +160,29 @@ export class CardList extends HTMLElement {
         }
       </style>
       ${
-        cards.length === 0
+        allCards.length === 0
           ? `<div class="empty">Nenhum cartão ainda. Adicione o primeiro acima.</div>`
           : `
-            <ul>${pageCards.map((c) => cardRow(c, audioSupported)).join("")}</ul>
+            <div class="filters">
+              ${FILTERS.map((f) => filterTag(f, allCards, this.filter)).join("")}
+            </div>
             ${
-              totalPages > 1
-                ? `
-              <div class="pagination">
-                <button data-prev ${this.page === 1 ? "disabled" : ""} aria-label="Página anterior">${ICON_CHEVRON_LEFT}</button>
-                <span class="info">Página ${this.page} de ${totalPages}</span>
-                <button data-next ${this.page === totalPages ? "disabled" : ""} aria-label="Próxima página">${ICON_CHEVRON_RIGHT}</button>
-              </div>
-            `
-                : ""
+              cards.length === 0
+                ? `<div class="empty">Nenhum cartão nessa categoria.</div>`
+                : `
+                  <ul>${pageCards.map((c) => cardRow(c, audioSupported)).join("")}</ul>
+                  ${
+                    totalPages > 1
+                      ? `
+                    <div class="pagination">
+                      <button data-prev ${this.page === 1 ? "disabled" : ""} aria-label="Página anterior">${ICON_CHEVRON_LEFT}</button>
+                      <span class="info">Página ${this.page} de ${totalPages}</span>
+                      <button data-next ${this.page === totalPages ? "disabled" : ""} aria-label="Próxima página">${ICON_CHEVRON_RIGHT}</button>
+                    </div>
+                  `
+                      : ""
+                  }
+                `
             }
           `
       }
@@ -186,6 +220,10 @@ export class CardList extends HTMLElement {
     if (nextBtn) {
       nextBtn.addEventListener("click", () => this.goToPage(this.page + 1));
     }
+
+    this.shadowRoot.querySelectorAll("[data-filter]").forEach((tag) => {
+      tag.addEventListener("click", () => this.setFilter(tag.dataset.filter));
+    });
   }
 }
 
@@ -195,7 +233,6 @@ function cardRow(card, audioSupported) {
       <div class="info">
         <div class="front">${escapeHtml(card.front)}</div>
         <div class="back">${escapeHtml(card.back)}</div>
-        <div class="due ${dueClass(card.srs.dueAt)}">${formatDue(card.srs.dueAt)}</div>
       </div>
       <div class="actions">
         ${audioSupported ? `<button data-audio="${escapeAttr(card.front)}" aria-label="Ouvir">${ICON_VOLUME}</button>` : ""}
@@ -216,26 +253,27 @@ const ICON_CHEVRON_LEFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentC
 
 const ICON_CHEVRON_RIGHT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
 
-function dueClass(dueAt) {
-  const due = new Date(dueAt);
-  const now = new Date();
-  return due <= now ? "today" : "future";
-}
-
-function formatDue(dueAt) {
+function dueGroup(dueAt) {
   const due = new Date(dueAt);
   const now = new Date();
 
-  if (due <= now) return "Pronto para revisar";
+  if (due <= now) return "today";
 
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDue = new Date(due.getFullYear(), due.getMonth(), due.getDate());
   const daysUntil = Math.round((startOfDue - startOfToday) / (1000 * 60 * 60 * 24));
 
-  if (daysUntil === 1) return "Revisar amanhã";
+  return daysUntil === 1 ? "tomorrow" : "later";
+}
 
-  const formatted = due.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
-  return `Revisar em ${daysUntil} dias (${formatted})`;
+function filterTag(filter, allCards, activeFilter) {
+  const count = allCards.filter((c) => dueGroup(c.srs.dueAt) === filter.key).length;
+  const isActive = activeFilter === filter.key;
+  return `
+    <button class="filter-tag ${isActive ? "active" : ""}" data-filter="${filter.key}">
+      ${filter.label}<span class="count">${count}</span>
+    </button>
+  `;
 }
 
 function escapeHtml(str) {
