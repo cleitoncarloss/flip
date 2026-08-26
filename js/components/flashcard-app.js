@@ -5,21 +5,32 @@ export class FlashcardApp extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this.view = "study";
+    this.editingCard = null;
+    this.modalOpen = false;
   }
 
   connectedCallback() {
     this.render();
-    this.addEventListener("card-saved", () => this.onDataChanged());
+    this.addEventListener("card-saved", () => {
+      this.closeModal();
+      this.onDataChanged();
+    });
     this.addEventListener("card-deleted", () => this.onDataChanged());
     this.addEventListener("session-progress", () => this.updateDueBadge());
     this.addEventListener("edit-card", (e) => {
-      this.view = "add";
+      this.editingCard = e.detail;
+      this.modalOpen = true;
       this.render();
-      requestAnimationFrame(() => {
-        const form = this.shadowRoot.querySelector("card-form");
-        if (form) form.editingCard = e.detail;
-      });
     });
+    this.addEventListener("cancel-edit", () => this.closeModal());
+    this.addEventListener("modal-close", () => this.closeModal());
+  }
+
+  closeModal() {
+    if (!this.modalOpen) return;
+    this.modalOpen = false;
+    this.editingCard = null;
+    this.render();
   }
 
   onDataChanged() {
@@ -109,11 +120,19 @@ export class FlashcardApp extends HTMLElement {
         ${this.view === "add" ? "<card-form></card-form>" : ""}
         ${this.view === "manage" ? "<card-list></card-list>" : ""}
       </section>
+      <app-modal ${this.modalOpen ? "open" : ""}>
+        ${this.modalOpen ? "<card-form id='edit-form'></card-form>" : ""}
+      </app-modal>
     `;
 
     this.shadowRoot.querySelectorAll("nav button").forEach((btn) => {
       btn.addEventListener("click", () => this.setView(btn.dataset.view));
     });
+
+    if (this.modalOpen) {
+      const editForm = this.shadowRoot.getElementById("edit-form");
+      if (editForm) editForm.editingCard = this.editingCard;
+    }
   }
 }
 

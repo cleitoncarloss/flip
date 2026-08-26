@@ -103,7 +103,7 @@ export class CardForm extends HTMLElement {
     if (cancelBtn) {
       cancelBtn.addEventListener("click", () => {
         this._editingCard = null;
-        this.dispatchEvent(new CustomEvent("cancel-edit"));
+        this.dispatchEvent(new CustomEvent("cancel-edit", { bubbles: true, composed: true }));
         this.render();
       });
     }
