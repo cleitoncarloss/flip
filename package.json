@@ -1,0 +1,11 @@
+{
+  "name": "flip",
+  "version": "1.0.0",
+  "description": "Flashcards para estudar inglês, com repetição espaçada (SM-2) e áudio.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run server.js",
+    "start": "bun run server.js"
+  }
+}
