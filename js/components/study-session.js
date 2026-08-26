@@ -84,9 +84,9 @@ export class StudySession extends HTMLElement {
           font-size: 0.7rem;
           opacity: 0.85;
         }
-        .difficult { background: #fee2e2; color: var(--color-danger, #dc2626); }
-        .medium { background: #fef3c7; color: var(--color-warning, #d97706); }
-        .easy { background: #dcfce7; color: var(--color-success, #16a34a); }
+        .difficult { background: var(--color-danger-bg, #fee2e2); color: var(--color-danger, #dc2626); }
+        .medium { background: var(--color-warning-bg, #fef3c7); color: var(--color-warning, #d97706); }
+        .easy { background: var(--color-success-bg, #dcfce7); color: var(--color-success, #16a34a); }
       </style>
       ${
         card

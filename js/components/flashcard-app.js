@@ -1,4 +1,5 @@
 import { getDueCards } from "../storage.js";
+import { getActiveTheme, toggleTheme } from "../theme.js";
 
 export class FlashcardApp extends HTMLElement {
   constructor() {
@@ -63,11 +64,33 @@ export class FlashcardApp extends HTMLElement {
         header {
           text-align: center;
           margin-bottom: 20px;
+          position: relative;
         }
         h1 {
           font-size: 1.6rem;
           margin: 0 0 4px;
           color: var(--color-primary, #4f46e5);
+        }
+        .theme-toggle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 1px solid var(--color-border, #e5e7eb);
+          background: var(--color-surface, #fff);
+          color: var(--color-text-muted, #6b7280);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .theme-toggle:hover {
+          background: var(--color-bg, #f5f6fa);
+        }
+        .theme-toggle svg {
+          width: 20px;
+          height: 20px;
         }
         nav {
           display: flex;
@@ -104,6 +127,9 @@ export class FlashcardApp extends HTMLElement {
         }
       </style>
       <header>
+        <button class="theme-toggle" data-theme-toggle aria-label="Alternar tema claro/escuro">
+          ${getActiveTheme() === "dark" ? ICON_SUN : ICON_MOON}
+        </button>
         <h1>Flip 🔁</h1>
         <div>Flashcards para estudar inglês</div>
       </header>
@@ -129,11 +155,20 @@ export class FlashcardApp extends HTMLElement {
       btn.addEventListener("click", () => this.setView(btn.dataset.view));
     });
 
+    this.shadowRoot.querySelector("[data-theme-toggle]").addEventListener("click", () => {
+      toggleTheme();
+      this.render();
+    });
+
     if (this.modalOpen) {
       const editForm = this.shadowRoot.getElementById("edit-form");
       if (editForm) editForm.editingCard = this.editingCard;
     }
   }
 }
+
+const ICON_SUN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+const ICON_MOON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
 
 customElements.define("flashcard-app", FlashcardApp);

@@ -122,6 +122,7 @@ export class CardList extends HTMLElement {
           border: 1px solid var(--color-border, #e5e7eb);
           font-family: inherit;
           background: var(--color-surface, #fff);
+          color: var(--color-text, #1f2330);
         }
         .filters {
           display: flex;

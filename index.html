@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flip - Flashcards de Inglês</title>
   <link rel="stylesheet" href="css/global.css" />
+  <script>
+    try {
+      var t = localStorage.getItem("flip.theme.v1");
+      if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <flashcard-app></flashcard-app>
@@ -12,6 +18,7 @@
   <script type="module" src="js/storage.js"></script>
   <script type="module" src="js/spaced-repetition.js"></script>
   <script type="module" src="js/speech.js"></script>
+  <script type="module" src="js/theme.js"></script>
   <script type="module" src="js/components/flashcard-item.js"></script>
   <script type="module" src="js/components/app-modal.js"></script>
   <script type="module" src="js/components/card-form.js"></script>

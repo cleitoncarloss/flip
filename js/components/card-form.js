@@ -54,6 +54,8 @@ export class CardForm extends HTMLElement {
           padding: 10px 12px;
           border-radius: 8px;
           border: 1px solid var(--color-border, #e5e7eb);
+          background: var(--color-surface, #fff);
+          color: var(--color-text, #1f2330);
           font-family: inherit;
           resize: vertical;
           min-height: 70px;
@@ -85,7 +87,7 @@ export class CardForm extends HTMLElement {
           display: flex;
           align-items: center;
           gap: 8px;
-          background: #fee2e2;
+          background: var(--color-danger-bg, #fee2e2);
           color: var(--color-danger, #dc2626);
           border-radius: 8px;
           padding: 10px 12px;
