@@ -33,6 +33,11 @@ export class CardForm extends HTMLElement {
           flex-direction: column;
           gap: 12px;
         }
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
         label {
           font-size: 0.85rem;
           font-weight: 600;
@@ -73,11 +78,11 @@ export class CardForm extends HTMLElement {
       </style>
       <form>
         <h2>${card ? "Editar cartão" : "Novo cartão"}</h2>
-        <div>
+        <div class="field">
           <label for="front">Frente (inglês)</label>
           <textarea id="front" required placeholder="ex: to give up">${escapeHtml(card?.front ?? "")}</textarea>
         </div>
-        <div>
+        <div class="field">
           <label for="back">Verso (tradução/significado)</label>
           <textarea id="back" required placeholder="ex: desistir">${escapeHtml(card?.back ?? "")}</textarea>
         </div>

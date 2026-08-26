@@ -66,8 +66,19 @@ export class CardList extends HTMLElement {
           border: 1px solid var(--color-border, #e5e7eb);
           background: none;
           border-radius: 8px;
-          padding: 8px 10px;
+          padding: 8px;
           font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--color-text-muted, #6b7280);
+        }
+        button svg {
+          width: 18px;
+          height: 18px;
+        }
+        button:hover {
+          background: var(--color-bg, #f5f6fa);
         }
         button.danger {
           color: var(--color-danger, #dc2626);
@@ -113,13 +124,19 @@ function cardRow(card, audioSupported) {
         <div class="back">${escapeHtml(card.back)}</div>
       </div>
       <div class="actions">
-        ${audioSupported ? `<button data-audio="${escapeAttr(card.front)}" aria-label="Ouvir">🔊</button>` : ""}
-        <button data-edit="${card.id}" aria-label="Editar">✏️</button>
-        <button class="danger" data-delete="${card.id}" aria-label="Excluir">🗑️</button>
+        ${audioSupported ? `<button data-audio="${escapeAttr(card.front)}" aria-label="Ouvir">${ICON_VOLUME}</button>` : ""}
+        <button data-edit="${card.id}" aria-label="Editar">${ICON_EDIT}</button>
+        <button class="danger" data-delete="${card.id}" aria-label="Excluir">${ICON_TRASH}</button>
       </div>
     </li>
   `;
 }
+
+const ICON_VOLUME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`;
+
+const ICON_EDIT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg>`;
+
+const ICON_TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
 
 function escapeHtml(str) {
   const div = document.createElement("div");
