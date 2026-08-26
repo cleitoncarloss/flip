@@ -66,6 +66,10 @@ export class StudySession extends HTMLElement {
           grid-template-columns: repeat(3, 1fr);
           gap: 8px;
           margin-top: 16px;
+          visibility: hidden;
+        }
+        .rating-buttons.visible {
+          visibility: visible;
         }
         button {
           padding: 12px 8px;
@@ -100,7 +104,12 @@ export class StudySession extends HTMLElement {
     `;
 
     if (card) {
-      this.shadowRoot.getElementById("item").card = card;
+      const item = this.shadowRoot.getElementById("item");
+      item.card = card;
+      const ratingButtons = this.shadowRoot.querySelector(".rating-buttons");
+      item.addEventListener("flip-change", (e) => {
+        ratingButtons.classList.toggle("visible", e.detail.flipped);
+      });
       this.shadowRoot.querySelectorAll("[data-rating]").forEach((btn) => {
         btn.addEventListener("click", () => this.rate(Number(btn.dataset.rating)));
       });

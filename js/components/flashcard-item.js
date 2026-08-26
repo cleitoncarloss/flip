@@ -34,6 +34,13 @@ export class FlashcardItem extends HTMLElement {
     } else {
       this.setAttribute("flipped", "");
     }
+    this.dispatchEvent(
+      new CustomEvent("flip-change", {
+        detail: { flipped: this.hasAttribute("flipped") },
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
   render() {
